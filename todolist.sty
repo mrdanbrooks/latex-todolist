@@ -1,0 +1,52 @@
+\ProvidesPackage{todolist}[9/22/2014 by Dan Brooks, tweaked by Eric McCann]
+
+% Changelog:
+%  -print todos in a section
+%  -make listtodo do nothing if the list is empty
+%  -remove circular "FINISH THE TODO LIST" list item
+%  -\noindent
+
+% A better TODO by [db], made better by [em]
+% Creates highly visible notes for things needing to be done in your document.
+% 
+% To use this in your document, add the following line to your preamble:
+%   \usepackage{todolist}
+% 
+% To make a todo marker, use the following command:
+%   \todo{Do me!}
+%
+% You can additionally generate a list of remaining todo items at the end of
+% your document by placing the following command just before \end{document}
+%   \listtodos
+% 
+% Finally, you can hide all of your todo's (including the optional list) by
+% using the following command just after \begin{document}
+%   \hidetodo 
+
+\usepackage{ifthen}
+\def\showtodos{}
+\newcommand{\hidetodo}{\def\showtodos{1}}
+\def\todostack{}
+\def\todostackcount{0}
+\newcommand{\todo}[1]{
+\ifthenelse{\equal{\showtodos}{}}{\noindent\textbf{\textit{TODO: #1}}%
+\let\xdo\relax%
+\count11=\todostackcount\relax%
+\advance\count11 by 1%
+\xdef\todostackcount{\the\count11}%
+\toks10{\xdo{#1}}%
+\toks12\expandafter{\todostack}%
+\xdef\todostack{\the\toks12 \the\toks10}%
+}{}}
+\def\listtodos{
+\ifthenelse{\equal{\showtodos}{}}{{%
+\ifthenelse{\equal{\todostackcount}{0}}{}{%
+\count11=0%
+\section{TODO LIST}%
+\begin{itemize}%
+\def\xdo##1{\advance\count11 by 1%
+\item ##1  }%
+\todostack%
+\end{itemize}}}}{}}%
+%% End of macro
+
